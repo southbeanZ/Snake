@@ -28,22 +28,39 @@ var Painter = {
 }
 
 var Snake = {
-	x: -20,
-	y: 0,
-	len: 2,
-	vx: 1,
+	vx: 20,
 	vy: 0,
-	view: function() {
+	dir: 'right',
+	posArr: [ //记录每一节位置
+		[20, 0],
+		[0, 0]
+	],
+	init: function() {
 		ctx.fillStyle = '#000';
-		ctx.fillRect(this.x + this.vx * 20, this.y, this.len * 20, 20);
-		this.x += this.vx * 20;
+		this.posArr.forEach((_e, _i) => {
+			ctx.fillRect(_e[0], _e[1], 20, 20);
+		})
+	},
+	view: function() {
+		var head = this.posArr[0],
+				tail = this.posArr[this.posArr.length - 1];
+		this.posArr.pop();
+		ctx.fillRect(head[0], head[1], 20, 20);
+		ctx.clearRect(tail[0], tail[1], 20, 20);
 	}
 }
 
 function move() {
-	ctx.clearRect(0, 0, 600, 400);
-	Painter.view(600, 400);
+	var x = Snake.posArr[0][0],
+			y = Snake.posArr[0][1];
+	if(Snake.vy != 0) {
+		y += Snake.vy;
+	} else if (Snake.vx != 0) {
+		x += Snake.vx;
+	}
+	Snake.posArr.unshift([x, y]);
 	Snake.view();
+	Painter.view(600, 400);
 	timer = setTimeout(function() {
 		raf = window.requestAnimationFrame(move);
 	}, 800);
@@ -56,15 +73,14 @@ var page = {
 		this.listen();
 	},
 	view: function() {
+		Snake.init();
 		Painter.view(600, 400);
-		Snake.view();
 	},
 	listen: function() {
 		startBtn.addEventListener('click', function() {
 			move();
 		}, false);
 		stopBtn.addEventListener('click', function() {
-			// window.cancelAnimationFrame(raf);
 			clearTimeout(timer);
 		}, false);
 		endBtn.addEventListener('click', function() {
@@ -75,18 +91,28 @@ var page = {
 			var key = e.keyCode || e.which;
 			switch(key) {
 				case 37: //左
-					if(Snake.vx > 0) {
-						Snake.vx = -Snake.vx;
+					if (Snake.vx == 0) {
+						Snake.vx = -20;
 					}
+					Snake.vy = 0;
 					break;
 				case 38: //上
+					if (Snake.vy == 0) {
+						Snake.vy = -20;
+					}
+					Snake.vx = 0;
 					break;
 				case 39: //右
-					if(Snake.vx < 0) {
-						Snake.vx = -Snake.vx;
+					if (Snake.vx == 0) {
+						Snake.vx = 20;
 					}
+					Snake.vy = 0;
 					break;
 				case 40: //下
+					if (Snake.vy == 0) {
+						Snake.vy = 20;
+					}
+					Snake.vx = 0;
 					break;
 				default:
 					;
