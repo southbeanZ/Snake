@@ -1,8 +1,10 @@
 var board = document.getElementById('board'),
+		background = document.getElementById('back'),
 		startBtn = document.getElementById('btn_start'),
 		stopBtn = document.getElementById('btn_stop'),
 		endBtn = document.getElementById('btn_end'),
-		ctx = board.getContext('2d');
+		ctx = board.getContext('2d'),
+		ctxBack = background.getContext('2d');
 var raf = null,
 		timer = null;
 
@@ -13,16 +15,16 @@ var Painter = {
 	view: function(w, h) {
 		var col = w / 20,
 				row = h / 20;
-		ctx.strokeStyle = '#BFBFBF';
+		ctxBack.strokeStyle = '#BFBFBF';
 		for(var i = 0; i <= row; i++) {
-			ctx.moveTo(0, i*20);
-			ctx.lineTo(w, i*20);
-			ctx.stroke();
+			ctxBack.moveTo(0, i*20);
+			ctxBack.lineTo(w, i*20);
+			ctxBack.stroke();
 		}
 		for(var i = 0; i <= col; i++) {
-			ctx.moveTo(i*20, 0);
-			ctx.lineTo(i*20, h);
-			ctx.stroke();
+			ctxBack.moveTo(i*20, 0);
+			ctxBack.lineTo(i*20, h);
+			ctxBack.stroke();
 		}
 	}
 }
@@ -60,7 +62,6 @@ function move() {
 	}
 	Snake.posArr.unshift([x, y]);
 	Snake.view();
-	Painter.view(600, 400);
 	timer = setTimeout(function() {
 		raf = window.requestAnimationFrame(move);
 	}, 800);

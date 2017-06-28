@@ -1,3 +1,9 @@
-.board {
+.box {
+	position: relative;
 	margin: 50px;
+}
+.board, .back {
+	position: absolute;
+	left: 0;
+	top: 0;
 }
