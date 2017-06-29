@@ -3,10 +3,13 @@ var board = document.getElementById('board'),
 		startBtn = document.getElementById('btn_start'),
 		stopBtn = document.getElementById('btn_stop'),
 		endBtn = document.getElementById('btn_end'),
+		replayBtn = document.getElementById('btn_replay'),
 		ctx = board.getContext('2d'),
 		ctxBack = background.getContext('2d');
 var raf = null,
-		timer = null;
+		timer = null,
+		canvasW = board.width,
+		canvasH = board.height;
 
 /*
  * 绘制场地
@@ -49,6 +52,17 @@ var Snake = {
 		this.posArr.pop();
 		ctx.fillRect(head[0], head[1], 20, 20);
 		ctx.clearRect(tail[0], tail[1], 20, 20);
+	},
+	reset: function() {
+		this.vx = 20;
+		this.vy = 0;
+		this.dir = 'right';
+		this.posArr = [
+			[20, 0],
+			[0, 0]
+		];
+		ctx.clearRect(0, 0, canvasW, canvasH);
+		this.init();
 	}
 }
 
@@ -60,10 +74,14 @@ function move() {
 	} else if (Snake.vx != 0) {
 		x += Snake.vx;
 	}
+	if(x > canvasW - 20 || x < 0 || y > canvasH - 20 || y < 0) {
+		alert('Game over');
+		return ;
+	}
 	Snake.posArr.unshift([x, y]);
 	Snake.view();
 	timer = setTimeout(function() {
-		raf = window.requestAnimationFrame(move);
+		move();
 	}, 800);
 }
 
@@ -75,7 +93,7 @@ var page = {
 	},
 	view: function() {
 		Snake.init();
-		Painter.view(600, 400);
+		Painter.view(canvasW, canvasH);
 	},
 	listen: function() {
 		startBtn.addEventListener('click', function() {
@@ -88,6 +106,10 @@ var page = {
 			clearTimeout(timer);
 			alert('Game over!');
 		}, false);
+		replayBtn.addEventListener('click', function() {
+			clearTimeout(timer);
+			Snake.reset();
+		})
 		window.addEventListener('keydown', function(e) {
 			var key = e.keyCode || e.which;
 			switch(key) {
