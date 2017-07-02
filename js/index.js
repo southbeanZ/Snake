@@ -45,6 +45,7 @@ var Snake = {
 	],
 	tagArr: null,
 	isEat: false,
+	step: 0,
 	init: function() {
 		this.tagArr = new Array();
 		for(var i = 0; i < Painter.col; i++) {
@@ -55,7 +56,7 @@ var Snake = {
 		}
 		ctx.fillStyle = '#000';
 		this.posArr.forEach((_e, _i) => {
-			this.tagArr[_e[0] / 20][_e[1] / 20] = 1;
+			this.tagArr[_e[1] / 20][_e[0] / 20] = 1;
 			ctx.fillRect(_e[0], _e[1], 20, 20);
 		})
 	},
@@ -63,14 +64,14 @@ var Snake = {
 		var head = this.posArr[0],
 				tail = this.posArr[this.posArr.length - 1];
 		ctx.fillStyle = '#000';
-		this.tagArr[head[0] / 20][head[1] / 20] = 1;
+		this.tagArr[head[1] / 20][head[0] / 20] = 1;
 		ctx.fillRect(head[0], head[1], 20, 20);
-		if(!Snake.isEat) {
+		if(!this.isEat) {
 			this.posArr.pop();
-			this.tagArr[tail[0] / 20][tail[1] / 20] = 0;
+			this.tagArr[tail[1] / 20][tail[0] / 20] = 0;
 			ctx.clearRect(tail[0], tail[1], 20, 20);
 		}
-		Snake.isEat = false;
+		this.isEat = false;
 	},
 	reset: function() {
 		this.vx = 20;
@@ -82,6 +83,34 @@ var Snake = {
 		];
 		ctx.clearRect(0, 0, canvasW, canvasH);
 		this.init();
+	},
+	move: function() {
+		var x = this.posArr[0][0],
+				y = this.posArr[0][1];
+		if(this.vy != 0) {
+			y += this.vy;
+		} else if (this.vx != 0) {
+			x += this.vx;
+		}
+		if(x > canvasW - 20 || x < 0 || y > canvasH - 20 || y < 0) {
+			alert('Game over');
+			return ;
+		}
+		if(Food.tagArr[y / 20][x / 20]) {
+			this.isEat = true;
+			Food.tagArr[y / 20][x / 20] = 0;
+		}
+		this.posArr.unshift([x, y]);
+		this.view();
+		this.step++;
+		if(this.step === 10) {
+			Food.view();
+			this.step = 0;
+		}
+		var self = this;
+		timer = setTimeout(function() {
+			self.move();
+		}, timeGap);
 	}
 }
 
@@ -89,9 +118,9 @@ var Food = {
 	tagArr: null,
 	init: function() {
 		this.tagArr = new Array();
-		for(var i = 0; i < Painter.col; i++) {
+		for(var i = 0; i < Painter.row; i++) {
 				this.tagArr[i] = new Array();
-			for(var j = 0; j < Painter.row; j++) {
+			for(var j = 0; j < Painter.col; j++) {
 				this.tagArr[i][j] = 0;
 			}
 		}
@@ -106,34 +135,10 @@ var Food = {
 		} else {
 			this.tagArr[i][j] = 1;
 			ctx.fillStyle = '#ddb146';
-			ctx.fillRect(i * 20, j * 20, 20, 20);
+			ctx.fillRect(j * 20, i * 20, 20, 20);
 		}
 	}
 }
-
-function move() {
-	var x = Snake.posArr[0][0],
-			y = Snake.posArr[0][1];
-	if(Snake.vy != 0) {
-		y += Snake.vy;
-	} else if (Snake.vx != 0) {
-		x += Snake.vx;
-	}
-	if(x > canvasW - 20 || x < 0 || y > canvasH - 20 || y < 0) {
-		alert('Game over');
-		return ;
-	}
-	if(Food.tagArr[x / 20][y / 20]) {
-		Snake.isEat = true;
-		Food.tagArr[x / 20][y / 20] = 0;
-	}
-	Snake.posArr.unshift([x, y]);
-	Snake.view();
-	timer = setTimeout(function() {
-		move();
-	}, timeGap);
-}
-
 
 var page = {
 	init: function() {
@@ -148,7 +153,7 @@ var page = {
 	},
 	listen: function() {
 		startBtn.addEventListener('click', function() {
-			move();
+			Snake.move();
 		}, false);
 		stopBtn.addEventListener('click', function() {
 			clearTimeout(timer);
