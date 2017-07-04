@@ -8,8 +8,7 @@ var board = document.getElementById('board'),
 		ctxBack = background.getContext('2d');
 var timer = null,
 		canvasW = board.width,
-		canvasH = board.height,
-		timeGap = 800;
+		canvasH = board.height;
 
 /*
  * 绘制场地
@@ -35,16 +34,18 @@ var Painter = {
 }
 
 var Snake = {
-	vx: 20,
+	vx: 1,
 	vy: 0,
+	timeGap: 800,
 	dir: 'right',
 	posArr: [ //记录每一节位置
-		[20, 0],
+		[1, 0],
 		[0, 0]
 	],
 	tagArr: null, //记录游戏区每一格占据信息
 	isEat: false,
 	step: 0,
+	counter: 0,
 	init: function() {
 		this.tagArr = new Array();
 		for(var i = 0; i < Painter.col; i++) {
@@ -55,25 +56,25 @@ var Snake = {
 		}
 		ctx.fillStyle = '#000';
 		this.posArr.forEach((_e, _i) => {
-			this.tagArr[_e[1] / 20][_e[0] / 20] = 1;
-			ctx.fillRect(_e[0], _e[1], 20, 20);
+			this.tagArr[_e[1]][_e[0]] = 1;
+			ctx.fillRect(_e[0] * 20, _e[1] * 20, 20, 20);
 		})
 	},
 	view: function() {
 		var head = this.posArr[0],
 				tail = this.posArr[this.posArr.length - 1];
 		ctx.fillStyle = '#000';
-		this.tagArr[head[1] / 20][head[0] / 20] = 1;
-		ctx.fillRect(head[0], head[1], 20, 20);
+		this.tagArr[head[1]][head[0]] = 1;
+		ctx.fillRect(head[0] * 20, head[1] * 20, 20, 20);
 		if(!this.isEat) {
 			this.posArr.pop();
-			this.tagArr[tail[1] / 20][tail[0] / 20] = 0;
-			ctx.clearRect(tail[0], tail[1], 20, 20);
+			this.tagArr[tail[1]][tail[0]] = 0;
+			ctx.clearRect(tail[0] * 20, tail[1] * 20, 20, 20);
 		}
 		this.isEat = false;
 	},
 	reset: function() {
-		this.vx = 20;
+		this.vx = 1;
 		this.vy = 0;
 		this.dir = 'right';
 		this.posArr = [
@@ -96,13 +97,13 @@ var Snake = {
 			return ;
 		}
 		if(x > canvasW - 20 || x < 0 || y > canvasH - 20 || y < 0
-				|| this.tagArr[y / 20][x / 20]) {
+				|| this.tagArr[y][x]) {
 			alert('Game over');
 			return ;
 		}
-		if(Food.tagArr[y / 20][x / 20]) {
+		if(Food.tagArr[y][x]) {
 			this.isEat = true;
-			Food.tagArr[y / 20][x / 20] = 0;
+			Food.tagArr[y][x] = 0;
 		}
 		this.posArr.unshift([x, y]);
 		this.view();
@@ -111,10 +112,17 @@ var Snake = {
 			Food.view();
 			this.step = 0;
 		}
+		this.counter++;
+		if(this.counter * this.timeGap > 60000) {
+			if(this.timeGap > 200) {
+				this.timeGap -= 100;
+			}
+			this.counter = 0;
+		}
 		var self = this;
 		timer = setTimeout(function() {
 			self.move();
-		}, timeGap);
+		}, this.timeGap);
 	}
 }
 
@@ -176,28 +184,28 @@ var page = {
 				case 37: //左
 				case 65:
 					if (Snake.vx == 0) {
-						Snake.vx = -20;
+						Snake.vx = -1;
 					}
 					Snake.vy = 0;
 					break;
 				case 38: //上
 				case 87:
 					if (Snake.vy == 0) {
-						Snake.vy = -20;
+						Snake.vy = -1;
 					}
 					Snake.vx = 0;
 					break;
 				case 39: //右
 				case 68:
 					if (Snake.vx == 0) {
-						Snake.vx = 20;
+						Snake.vx = 1;
 					}
 					Snake.vy = 0;
 					break;
 				case 40: //下
 				case 83:
 					if (Snake.vy == 0) {
-						Snake.vy = 20;
+						Snake.vy = 1;
 					}
 					Snake.vx = 0;
 					break;
