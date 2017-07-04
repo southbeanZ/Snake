@@ -6,8 +6,7 @@ var board = document.getElementById('board'),
 		replayBtn = document.getElementById('btn_replay'),
 		ctx = board.getContext('2d'),
 		ctxBack = background.getContext('2d');
-var raf = null,
-		timer = null,
+var timer = null,
 		canvasW = board.width,
 		canvasH = board.height,
 		timeGap = 800;
@@ -43,7 +42,7 @@ var Snake = {
 		[20, 0],
 		[0, 0]
 	],
-	tagArr: null,
+	tagArr: null, //记录游戏区每一格占据信息
 	isEat: false,
 	step: 0,
 	init: function() {
@@ -92,7 +91,12 @@ var Snake = {
 		} else if (this.vx != 0) {
 			x += this.vx;
 		}
-		if(x > canvasW - 20 || x < 0 || y > canvasH - 20 || y < 0) {
+		if(this.posArr.length === Painter.col * Painter.row) {
+			alert('You win!');
+			return ;
+		}
+		if(x > canvasW - 20 || x < 0 || y > canvasH - 20 || y < 0
+				|| this.tagArr[y / 20][x / 20]) {
 			alert('Game over');
 			return ;
 		}
@@ -170,24 +174,28 @@ var page = {
 			var key = e.keyCode || e.which;
 			switch(key) {
 				case 37: //左
+				case 65:
 					if (Snake.vx == 0) {
 						Snake.vx = -20;
 					}
 					Snake.vy = 0;
 					break;
 				case 38: //上
+				case 87:
 					if (Snake.vy == 0) {
 						Snake.vy = -20;
 					}
 					Snake.vx = 0;
 					break;
 				case 39: //右
+				case 68:
 					if (Snake.vx == 0) {
 						Snake.vx = 20;
 					}
 					Snake.vy = 0;
 					break;
 				case 40: //下
+				case 83:
 					if (Snake.vy == 0) {
 						Snake.vy = 20;
 					}
