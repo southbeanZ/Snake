@@ -7,10 +7,16 @@
 </head>
 <body>
 	<div class="btns">
-		<button id="btn_start">开始游戏</button>
-		<button id="btn_stop">暂停游戏</button>
-		<button id="btn_end">结束游戏</button>
-		<button id="btn_replay">重新开始</button>
+		<select name="type" id="game_type">
+			<option value="1">普通模式</option>
+			<option value="2">过关模式</option>
+			<option value="3">躲避模式</option>
+		</select>
+		<button id="btn_start" class="btn btn-start">开始游戏</button>
+		<button id="btn_continue" class="btn btn-continue">继续游戏</button>
+		<button id="btn_stop" class="btn">暂停游戏</button>
+		<button id="btn_end" class="btn">结束游戏</button>
+		<button id="btn_replay" class="btn">重新开始</button>
 	</div>
 	<div class="box">
 		<canvas class="back" id="back" width="300" height="200"></canvas>

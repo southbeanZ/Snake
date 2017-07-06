@@ -1,9 +1,11 @@
 var board = document.getElementById('board'),
 		background = document.getElementById('back'),
 		startBtn = document.getElementById('btn_start'),
+		continueBtn = document.getElementById('btn_continue'),
 		stopBtn = document.getElementById('btn_stop'),
 		endBtn = document.getElementById('btn_end'),
 		replayBtn = document.getElementById('btn_replay'),
+		gameType = document.getElementById('game_type'),
 		ctx = board.getContext('2d'),
 		ctxBack = background.getContext('2d');
 var timer = null,
@@ -78,7 +80,7 @@ var Snake = {
 		this.vy = 0;
 		this.dir = 'right';
 		this.posArr = [
-			[20, 0],
+			[1, 0],
 			[0, 0]
 		];
 		ctx.clearRect(0, 0, canvasW, canvasH);
@@ -165,6 +167,13 @@ var page = {
 	},
 	listen: function() {
 		startBtn.addEventListener('click', function() {
+			startBtn.style.display = 'none';
+			continueBtn.style.display = 'inline-block';
+			var type = game_type.value;
+			console.log(type);
+			Snake.move();
+		}, false);
+		continueBtn.addEventListener('click', function() {
 			Snake.move();
 		}, false);
 		stopBtn.addEventListener('click', function() {
@@ -175,8 +184,12 @@ var page = {
 			alert('Game over!');
 		}, false);
 		replayBtn.addEventListener('click', function() {
+			startBtn.style.display = 'inline-block';
+			continueBtn.style.display = 'none';
 			clearTimeout(timer);
 			Snake.reset();
+			Food.init();
+			Food.view();
 		})
 		window.addEventListener('keydown', function(e) {
 			var key = e.keyCode || e.which;
@@ -209,6 +222,8 @@ var page = {
 					}
 					Snake.vx = 0;
 					break;
+				case 32:
+					clearTimeout(timer);
 				default:
 					;
 			}
