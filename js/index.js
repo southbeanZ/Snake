@@ -98,7 +98,7 @@ var Snake = {
 			alert('You win!');
 			return ;
 		}
-		if(x > canvasW - 20 || x < 0 || y > canvasH - 20 || y < 0
+		if(x > Painter.col - 1 || x < 0 || y > Painter.row - 1 || y < 0
 				|| this.tagArr[y][x]) {
 			alert('Game over');
 			return ;
