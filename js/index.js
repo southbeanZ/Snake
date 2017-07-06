@@ -6,6 +6,7 @@ var board = document.getElementById('board'),
 		endBtn = document.getElementById('btn_end'),
 		replayBtn = document.getElementById('btn_replay'),
 		gameType = document.getElementById('game_type'),
+		gameScore = document.getElementById('game_score'),
 		ctx = board.getContext('2d'),
 		ctxBack = background.getContext('2d');
 var timer = null,
@@ -36,19 +37,22 @@ var Painter = {
 }
 
 var Snake = {
-	vx: 1,
-	vy: 0,
-	timeGap: 800,
-	dir: 'right',
-	posArr: [ //记录每一节位置
-		[1, 0],
-		[0, 0]
-	],
-	tagArr: null, //记录游戏区每一格占据信息
-	isEat: false,
-	step: 0,
-	counter: 0,
 	init: function() {
+		this.vx = 1;
+		this.vy = 0;
+		this.timeGap = 800;
+		this.posArr = [ //记录每一节位置
+			[1, 0],
+			[0, 0]
+		];
+		this.tagArr = null; //记录游戏区每一格占据信息
+		this.isEat = false;
+		this.step = 0; //食物生成步数
+		this.counter = 0; //普通模式计时
+		this.mode = 0;  // 0：普通模式 1：关卡模式 2：躲避模式
+		this.score = 10; //过关模式
+		this.level = 1;
+
 		this.tagArr = new Array();
 		for(var i = 0; i < Painter.col; i++) {
 				this.tagArr[i] = new Array();
@@ -76,13 +80,6 @@ var Snake = {
 		this.isEat = false;
 	},
 	reset: function() {
-		this.vx = 1;
-		this.vy = 0;
-		this.dir = 'right';
-		this.posArr = [
-			[1, 0],
-			[0, 0]
-		];
 		ctx.clearRect(0, 0, canvasW, canvasH);
 		this.init();
 	},
@@ -94,9 +91,32 @@ var Snake = {
 		} else if (this.vx != 0) {
 			x += this.vx;
 		}
-		if(this.posArr.length === Painter.col * Painter.row) {
-			alert('You win!');
-			return ;
+		if(this.mode === 0) {
+			if(this.isWin0()) {
+				return ;
+			}
+			this.counter++;
+			if(this.counter * this.timeGap > 60000) {
+				if(this.timeGap > 200) {
+					this.timeGap -= 100;
+				}
+				this.counter = 0;
+			}
+		} else if (this.mode === 1) {
+			if(this.isWin1()) {
+				return ;
+			}
+		} else if (this.mode === 2) {
+			if(this.isWin0()) {
+				return ;
+			}
+			this.counter++;
+			if(this.counter * this.timeGap > 60000) {
+				if(this.timeGap > 200) {
+					this.timeGap -= 100;
+				}
+				this.counter = 0;
+			}
 		}
 		if(x > Painter.col - 1 || x < 0 || y > Painter.row - 1 || y < 0
 				|| this.tagArr[y][x]) {
@@ -106,6 +126,7 @@ var Snake = {
 		if(Food.tagArr[y][x]) {
 			this.isEat = true;
 			Food.tagArr[y][x] = 0;
+			gameScore.innerHTML = this.posArr.length - 1;
 		}
 		this.posArr.unshift([x, y]);
 		this.view();
@@ -114,17 +135,31 @@ var Snake = {
 			Food.view();
 			this.step = 0;
 		}
-		this.counter++;
-		if(this.counter * this.timeGap > 60000) {
-			if(this.timeGap > 200) {
-				this.timeGap -= 100;
-			}
-			this.counter = 0;
-		}
 		var self = this;
 		timer = setTimeout(function() {
 			self.move();
 		}, this.timeGap);
+	},
+	isWin0: function() {
+		if(this.posArr.length === Painter.col * Painter.row) {
+			alert('You win!');
+			return true;
+		}
+		return false;
+	},
+	isWin1: function() {
+		if(this.posArr.length === (this.score + 2)) {
+			if(this.level == 7) {
+				alert('You win!');
+				return true;
+			} else {
+				alert('Pass level' + this.level + '!');
+			}
+			this.score += 10;
+			this.level += 1;
+			this.timeGap -= 100;
+		}
+		return false;
 	}
 }
 
@@ -169,8 +204,7 @@ var page = {
 		startBtn.addEventListener('click', function() {
 			startBtn.style.display = 'none';
 			continueBtn.style.display = 'inline-block';
-			var type = game_type.value;
-			console.log(type);
+			Snake.mode = +game_type.value;
 			Snake.move();
 		}, false);
 		continueBtn.addEventListener('click', function() {
