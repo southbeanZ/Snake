@@ -52,6 +52,7 @@ var Snake = {
 		this.mode = 0;  // 0：普通模式 1：关卡模式 2：躲避模式
 		this.score = 10; //过关模式
 		this.level = 1;
+		this.score2 = 5; //躲避模式
 
 		this.tagArr = new Array();
 		for(var i = 0; i < Painter.col; i++) {
@@ -107,7 +108,7 @@ var Snake = {
 				return ;
 			}
 		} else if (this.mode === 2) {
-			if(this.isWin0()) {
+			if(this.isWin2()) {
 				return ;
 			}
 			this.counter++;
@@ -120,6 +121,10 @@ var Snake = {
 		}
 		if(x > Painter.col - 1 || x < 0 || y > Painter.row - 1 || y < 0
 				|| this.tagArr[y][x]) {
+			alert('Game over');
+			return ;
+		}
+		if(Snake.mode ===2 && Wall.tagArr[y][x]) {
 			alert('Game over');
 			return ;
 		}
@@ -160,6 +165,26 @@ var Snake = {
 			this.timeGap -= 100;
 		}
 		return false;
+	},
+	isWin2: function() {
+		if(this.posArr.length === (this.score2 + 2)) {
+			if(this.level == 3) {
+				alert('You win!');
+				return true;
+			} else {
+				alert('Pass level' + this.level + '!');
+				clearTimeout(timer);
+				Snake.reset();
+				Snake.mode = 2;
+				Wall.init();
+				Wall.level += 1;
+				Snake.level = Wall.level;
+				Wall.view();
+				Food.init();
+				return true;
+			}
+		}
+		return false;
 	}
 }
 
@@ -173,12 +198,13 @@ var Food = {
 				this.tagArr[i][j] = 0;
 			}
 		}
+		this.view();
 	},
 	view: function() {
 		var i = Math.floor(Math.random() * Painter.row),
 				j = Math.floor(Math.random() * Painter.col);
 		var pos = [i, j];
-		if(Snake.tagArr[i][j] || this.tagArr[i][j]) {
+		if(Snake.tagArr[i][j] || this.tagArr[i][j] || (Snake.mode ===2 && Wall.tagArr[i][j])) {
 			this.view();
 			return ;
 		} else {
@@ -186,6 +212,44 @@ var Food = {
 			ctx.fillStyle = '#ddb146';
 			ctx.fillRect(j * 20, i * 20, 20, 20);
 		}
+	}
+}
+
+var Wall = {
+	tagArr: null,
+	posX: [
+		[2, 2, 7, 7],
+		[3, 4, 5, 6, 3, 4, 5, 6],
+		[2, 2, 3, 2, 2, 3, 6, 7, 7, 6, 7, 7, 4, 5]
+	],
+	posY: [
+		[2, 12, 2, 12],
+		[3, 3, 3, 3, 11, 11, 11, 11],
+		[2, 3, 2, 11, 12, 12, 2, 2, 3, 12, 12, 11, 7, 7]
+	],
+	level: 1,
+	init: function() {
+		this.tagArr = new Array();
+		for(var i = 0; i < Painter.row; i++) {
+				this.tagArr[i] = new Array();
+			for(var j = 0; j < Painter.col; j++) {
+				this.tagArr[i][j] = 0;
+			}
+		}
+	},
+	view: function() {
+		ctx.fillStyle = '#aaa';
+		if(this.level > 1) {
+			this.posX[this.level - 2].forEach((_e, _i) => {
+				var _y = this.posY[this.level - 2][_i];
+				ctx.clearRect(_y * 20, _e * 20, 20, 20);
+			});
+		}
+		this.posX[this.level - 1].forEach((_e, _i) => {
+			var _y = this.posY[this.level - 1][_i];
+			this.tagArr[_e][_y] = 1;
+			ctx.fillRect(_y * 20, _e * 20, 20, 20);
+		});
 	}
 }
 
@@ -197,14 +261,17 @@ var page = {
 	view: function() {
 		Painter.view(canvasW, canvasH);
 		Snake.init();
-		Food.init();
-		Food.view();
+		Wall.init();
 	},
 	listen: function() {
 		startBtn.addEventListener('click', function() {
 			startBtn.style.display = 'none';
 			continueBtn.style.display = 'inline-block';
 			Snake.mode = +game_type.value;
+			if(Snake.mode === 2) {
+				Wall.view();
+			}
+			Food.init();
 			Snake.move();
 		}, false);
 		continueBtn.addEventListener('click', function() {
@@ -220,10 +287,12 @@ var page = {
 		replayBtn.addEventListener('click', function() {
 			startBtn.style.display = 'inline-block';
 			continueBtn.style.display = 'none';
+			gameScore.innerHTML = 0;
 			clearTimeout(timer);
 			Snake.reset();
 			Food.init();
-			Food.view();
+			Wall.init();
+			Wall.level = 1;
 		})
 		window.addEventListener('keydown', function(e) {
 			var key = e.keyCode || e.which;
