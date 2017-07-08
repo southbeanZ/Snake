@@ -146,6 +146,7 @@ var Snake = {
 		timer = setTimeout(function() {
 			self.move();
 		}, this.timeGap);
+		page.keyPress = false;
 	},
 	isWin0: function() {
 		if(this.posArr.length === Painter.col * Painter.row) {
@@ -301,41 +302,45 @@ var page = {
 			Wall.init();
 			Wall.level = 1;
 		})
+		this.keyPress = false;
 		window.addEventListener('keydown', function(e) {
-			var key = e.keyCode || e.which;
-			switch(key) {
-				case 37: //左
-				case 65:
-					if (Snake.vx == 0) {
-						Snake.vx = -1;
-					}
-					Snake.vy = 0;
-					break;
-				case 38: //上
-				case 87:
-					if (Snake.vy == 0) {
-						Snake.vy = -1;
-					}
-					Snake.vx = 0;
-					break;
-				case 39: //右
-				case 68:
-					if (Snake.vx == 0) {
-						Snake.vx = 1;
-					}
-					Snake.vy = 0;
-					break;
-				case 40: //下
-				case 83:
-					if (Snake.vy == 0) {
-						Snake.vy = 1;
-					}
-					Snake.vx = 0;
-					break;
-				case 32:
-					clearTimeout(timer);
-				default:
-					;
+			if(!page.keyPress) {
+				page.keyPress = true;
+				var key = e.keyCode || e.which;
+				switch(key) {
+					case 37: //左
+					case 65:
+						if (Snake.vx == 0) {
+							Snake.vx = -1;
+						}
+						Snake.vy = 0;
+						break;
+					case 38: //上
+					case 87:
+						if (Snake.vy == 0) {
+							Snake.vy = -1;
+						}
+						Snake.vx = 0;
+						break;
+					case 39: //右
+					case 68:
+						if (Snake.vx == 0) {
+							Snake.vx = 1;
+						}
+						Snake.vy = 0;
+						break;
+					case 40: //下
+					case 83:
+						if (Snake.vy == 0) {
+							Snake.vy = 1;
+						}
+						Snake.vx = 0;
+						break;
+					case 32:
+						clearTimeout(timer);
+					default:
+						;
+				}
 			}
 		})
 	}
