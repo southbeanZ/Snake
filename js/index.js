@@ -7,6 +7,8 @@ var board = document.getElementById('board'),
 		replayBtn = document.getElementById('btn_replay'),
 		gameType = document.getElementById('game_type'),
 		gameScore = document.getElementById('game_score'),
+		gameInfo = document.getElementById('game_info'),
+		gameLevel = document.getElementById('game_level'),
 		ctx = board.getContext('2d'),
 		ctxBack = background.getContext('2d');
 var timer = null,
@@ -162,6 +164,7 @@ var Snake = {
 			}
 			this.score += 10;
 			this.level += 1;
+			gameLevel.innerHTML = this.level;
 			this.timeGap -= 100;
 		}
 		return false;
@@ -174,11 +177,12 @@ var Snake = {
 			} else {
 				alert('Pass level' + this.level + '!');
 				clearTimeout(timer);
-				Snake.reset();
-				Snake.mode = 2;
+				this.reset();
+				this.mode = 2;
 				Wall.init();
 				Wall.level += 1;
-				Snake.level = Wall.level;
+				this.level = Wall.level;
+				gameLevel.innerHTML = this.level;
 				Wall.view();
 				Food.init();
 				return true;
@@ -268,8 +272,11 @@ var page = {
 			startBtn.style.display = 'none';
 			continueBtn.style.display = 'inline-block';
 			Snake.mode = +game_type.value;
-			if(Snake.mode === 2) {
-				Wall.view();
+			if(Snake.mode > 0) {
+				gameInfo.style.display = 'block';
+				if(Snake.mode === 2) {
+					Wall.view();
+				}
 			}
 			Food.init();
 			Snake.move();

@@ -21,3 +21,7 @@
 .btns	.btn-continue {
 	display: none;
 }
+
+.infos .txt-level {
+	display: none;
+}
