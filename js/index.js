@@ -5,10 +5,17 @@ var board = document.getElementById('board'),
 		stopBtn = document.getElementById('btn_stop'),
 		endBtn = document.getElementById('btn_end'),
 		replayBtn = document.getElementById('btn_replay'),
+		resetBtn = document.getElementById('btn_reset'),
 		gameType = document.getElementById('game_type'),
 		gameScore = document.getElementById('game_score'),
 		gameInfo = document.getElementById('game_info'),
 		gameLevel = document.getElementById('game_level'),
+		finalScore = document.getElementById('final_score'),
+		pop = document.getElementById('pop'),
+		popCover = document.getElementById('pop-cover'),
+		popType = document.getElementById('pop-type'),
+		popStop = document.getElementById('pop-stop'),
+		popResult = document.getElementById('pop-result'),
 		ctx = board.getContext('2d'),
 		ctxBack = background.getContext('2d');
 var timer = null,
@@ -52,9 +59,10 @@ var Snake = {
 		this.step = 0; //食物生成步数
 		this.counter = 0; //普通模式计时
 		this.mode = 0;  // 0：普通模式 1：关卡模式 2：躲避模式
-		this.score = 10; //过关模式
+		this.score = this.score || 0;
+		this.goalScore = 10; //过关模式
 		this.level = 1;
-		this.score2 = 5; //躲避模式
+		this.goalScore2 = 5; //躲避模式
 
 		this.tagArr = new Array();
 		for(var i = 0; i < Painter.col; i++) {
@@ -121,19 +129,19 @@ var Snake = {
 				this.counter = 0;
 			}
 		}
-		if(x > Painter.col - 1 || x < 0 || y > Painter.row - 1 || y < 0
-				|| this.tagArr[y][x]) {
-			alert('Game over');
-			return ;
-		}
-		if(Snake.mode ===2 && Wall.tagArr[y][x]) {
-			alert('Game over');
+		if(x > Painter.col - 1 || x < 0 || y > Painter.row - 1 || y < 0   //撞到四壁
+				|| this.tagArr[y][x]                                          //撞到自己
+				|| Snake.mode ===2 && Wall.tagArr[y][x]) {                    //撞到障碍物
+			pop.style.display = 'block';
+			finalScore.innerHTML = gameScore.innerHTML;
+			popResult.style.display = 'block';
 			return ;
 		}
 		if(Food.tagArr[y][x]) {
 			this.isEat = true;
 			Food.tagArr[y][x] = 0;
-			gameScore.innerHTML = this.posArr.length - 1;
+			this.score ++;
+			gameScore.innerHTML = this.score;
 		}
 		this.posArr.unshift([x, y]);
 		this.view();
@@ -156,14 +164,14 @@ var Snake = {
 		return false;
 	},
 	isWin1: function() {
-		if(this.posArr.length === (this.score + 2)) {
+		if(this.posArr.length === (this.goalScore + 2)) {
 			if(this.level == 7) {
 				alert('You win!');
 				return true;
 			} else {
 				alert('Pass level' + this.level + '!');
 			}
-			this.score += 10;
+			this.goalScore += 10;
 			this.level += 1;
 			gameLevel.innerHTML = this.level;
 			this.timeGap -= 100;
@@ -171,7 +179,7 @@ var Snake = {
 		return false;
 	},
 	isWin2: function() {
-		if(this.posArr.length === (this.score2 + 2)) {
+		if(this.posArr.length === (this.goalScore2 + 2)) {
 			if(this.level == 3) {
 				alert('You win!');
 				return true;
@@ -186,6 +194,7 @@ var Snake = {
 				gameLevel.innerHTML = this.level;
 				Wall.view();
 				Food.init();
+				this.move();
 				return true;
 			}
 		}
@@ -270,9 +279,16 @@ var page = {
 	},
 	listen: function() {
 		startBtn.addEventListener('click', function() {
-			startBtn.style.display = 'none';
-			continueBtn.style.display = 'inline-block';
-			Snake.mode = +game_type.value;
+			pop.style.display = 'none';
+			popType.style.display = 'none';
+
+			//获取游戏模式
+			var mode = document.getElementsByName('game_type');
+			mode.forEach((_e) => {
+				if(_e.checked) {
+					Snake.mode = +_e.value;
+				}
+			});
 			if(Snake.mode > 0) {
 				gameInfo.style.display = 'block';
 				if(Snake.mode === 2) {
@@ -283,25 +299,31 @@ var page = {
 			Snake.move();
 		}, false);
 		continueBtn.addEventListener('click', function() {
+			pop.style.display = 'none';
+			popStop.style.display = 'none';
 			Snake.move();
 		}, false);
 		stopBtn.addEventListener('click', function() {
+			pop.style.display = 'block';
+			popStop.style.display = 'block';
 			clearTimeout(timer);
 		}, false);
 		endBtn.addEventListener('click', function() {
 			clearTimeout(timer);
-			alert('Game over!');
+			popStop.style.display = 'none';
+			finalScore.innerHTML = gameScore.innerHTML;
+			popResult.style.display = 'block';
 		}, false);
-		replayBtn.addEventListener('click', function() {
-			startBtn.style.display = 'inline-block';
-			continueBtn.style.display = 'none';
+		resetBtn.addEventListener('click', function() {
+			popResult.style.display = 'none';
+			popType.style.display = 'block';
+			gameInfo.style.display = 'none';
 			gameScore.innerHTML = 0;
 			clearTimeout(timer);
 			Snake.reset();
-			Food.init();
 			Wall.init();
 			Wall.level = 1;
-		})
+		}, false);
 		this.keyPress = false;
 		window.addEventListener('keydown', function(e) {
 			if(!page.keyPress) {
