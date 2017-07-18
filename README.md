@@ -1,6 +1,7 @@
 # Snake
 Snake Game 贪吃蛇
-纯js，html5, css3实现
+
+原生js，html5, css3实现
 
 预览效果：[https://southbeanz.github.io/Snake/](https://southbeanz.github.io/Snake/)
 
